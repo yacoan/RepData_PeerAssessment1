@@ -1,20 +1,122 @@
-# Reproducible Research: Peer Assessment 1
+Reproducible Research: Peer Assessment 1
+========================================================
+
+```{r download, echo=FALSE}
+#Download & Unzip Activity monitoring Dataset
+setwd("C:/Users/js1/Dropbox/Repository/RepData_PeerAssessment1")
+fileUrl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+#download.file(fileUrl, destfile = "Dataset.zip")
+#unzip("Dataset.zip")
+```
+
+* Loading and preprocessing the data
+```{r}
+activity = read.csv("activity.csv", sep=",", na.strings = "NA")
+activity$date <- as.Date(activity$date)
+```
+
+* Summary of the Dataset
+```{r}
+summary(activity)
+```
+
+* Histogram of the total number of steps taken each day
+```{r}
+library(ggplot2)
+q<-qplot(date, weight=activity$steps, data=activity, geom="histogram")
+suppressMessages(print(q)) #Supressing ggplot messages
+```
+
+* Calculate and report the mean and median total number of steps taken per day
+```{r}
+mean <- mean(tapply(activity$steps, activity$date, sum, na.rm = TRUE))
+median <- median(tapply(activity$steps, activity$date, sum, na.rm = TRUE))
+```
+
+The Mean is: **`r mean`** and the Median: **`r median`**
+
+* Time Series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+```{r average_steps, fig.width=10, fig.height=5}
+average_steps<-data.frame(cbind(activity$interval,tapply(activity$steps, activity$interval, mean, na.rm = TRUE)))
+colnames(average_steps) <- c("interval","steps")
+
+q<-ggplot(data=average_steps,aes(x=interval,y=steps, color=steps)) +
+    geom_line() 
+
+print(q)
+```
+
+* The 5-minute interval, on average across all the days in the dataset, that contains the maximum number of steps
+```{r}
+maxtime<-average_steps[which.max(average_steps$steps),"interval"]
+strftime( as.POSIXct(Sys.Date()) + as.difftime(round(maxtime/100), units="hours")+ as.difftime(maxtime%%100, units="mins"), "%r",tz="UTC")
+```
+
+* Imputing missing values
+```{r}
+missing <- sum(is.na(activity))
+```
+
+Number of missing values is `r missing`
+
+* Filling in all of the missing values in the dataset by using mean for that 5-minute interval
+```{r}
+#Copy of the original DataSet
+fixed <- activity
+
+#Remove duplicates 
+average_steps <- average_steps[!duplicated(average_steps),]
+
+for (i in 1:nrow(fixed)) {
+    if (is.na(fixed[i, "steps"])){
+        x <- fixed[i, "interval"]
+        temp <- average_steps[average_steps$interval == x,]
+        fixed[i,"steps"] <- temp$steps
+        }
+}
+```
+
+* Histogram of the total number of steps taken each day 
+```{r total_steps, fig.width=10, fig.height=5}
+q<-qplot(date, weight=fixed$steps, data=fixed, geom="histogram")
+suppressMessages(print(q)) #Supressing ggplot messages
+```
+
+* Calculate and report the mean and median total number of steps taken per day. 
+```{r}
+mean_fixed <- mean(tapply(fixed$steps, fixed$date, sum, na.rm = TRUE))
+median_fixed <- median(tapply(fixed$steps, fixed$date, sum, na.rm = TRUE))
+```        
+
+* Do these values differ from the estimates from the first part of the assignment?: 
+```r (mean!=mean_fixed && median!=median_fixed)```
+
+* What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+New Mean: **`r mean_fixed`**        First mean: **`r mean`**
+New Median: **`r median_fixed`**    First Median: **`r median`**
+
+* Create New factor variable in the dataset with two levels - "weekday" and "weekend" 
+```{r}
+#install.packages("timeDate")
+library(timeDate)
+
+for (i in 1:nrow(fixed)) {
+    if (isWeekend(fixed[i, "date"])){
+        #print(fixed[i, "date"])
+        fixed[i, "wk"] <- "weekend"
+    } else {
+        fixed[i, "wk"] <- "weekday"
+    }
+}
+
+fixed$wk <- as.factor(fixed$wk)
+```
+
+* Panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+```{r , fig.width=10, fig.height=5}
+q<-ggplot(data=fixed,aes(x=interval,y=steps)) + facet_grid(wk ~ .) + geom_line()
+print(q)
+```
 
 
-## Loading and preprocessing the data
-
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
