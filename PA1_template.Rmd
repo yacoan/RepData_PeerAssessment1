@@ -21,7 +21,7 @@ summary(activity)
 ```
 
 * Histogram of the total number of steps taken each day
-```{r}
+```{r total_hist}
 library(ggplot2)
 q<-qplot(date, weight=activity$steps, data=activity, geom="histogram")
 suppressMessages(print(q)) #Supressing ggplot messages
@@ -114,7 +114,7 @@ fixed$wk <- as.factor(fixed$wk)
 ```
 
 * Panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
-```{r , fig.width=10, fig.height=5}
+```{r double_plot, fig.width=10, fig.height=5}
 q<-ggplot(data=fixed,aes(x=interval,y=steps)) + facet_grid(wk ~ .) + geom_line()
 print(q)
 ```

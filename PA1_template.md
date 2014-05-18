@@ -38,7 +38,7 @@ q <- qplot(date, weight = activity$steps, data = activity, geom = "histogram")
 suppressMessages(print(q))  #Supressing ggplot messages
 ```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+![plot of chunk total_hist](figure/total_hist.png) 
 
 
 * Calculate and report the mean and median total number of steps taken per day
@@ -161,7 +161,7 @@ q <- ggplot(data = fixed, aes(x = interval, y = steps)) + facet_grid(wk ~ .) +
 print(q)
 ```
 
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
+![plot of chunk double_plot](figure/double_plot.png) 
 
 
 
